@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CodeEditor from './CodeEditor';
-import '../styles/PythonLesson.css';
 
-const PythonLesson = () => {
+const PythonLessonFixed = () => {
   const [lesson, setLesson] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,27 +12,28 @@ const PythonLesson = () => {
 
   useEffect(() => {
     const fetchLesson = async () => {
+      setLoading(true);
       try {
         const difficulty = sessionStorage.getItem('difficulty') || 'beginner';
         console.log('正在獲取課程，難度:', difficulty);
         
-        // 修正 API 端點 - 使用正確的伺服器和方法
+        // 使用更詳細的錯誤處理和日誌記錄
         const response = await fetch('http://localhost:5000/api/generateLesson', {
-          method: 'POST',  // 確保這裡使用 POST 方法
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ difficulty }),
         });
         
+        console.log('響應狀態:', response.status);
+        
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error('獲取課程失敗:', response.status, errorData);
-          throw new Error(`無法獲取課程: ${response.status} ${errorData.error || ''}`);
+          throw new Error(`無法獲取課程: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('成功獲取課程:', data.title);
+        console.log('成功獲取課程:', data);
         setLesson(data);
       } catch (err) {
         console.error('Error fetching lesson:', err);
@@ -51,10 +51,14 @@ const PythonLesson = () => {
   };
 
   const handleSubmit = async () => {
+    if (!lesson?.exercise) {
+      setFeedback({ status: 'error', message: '無法提交答案：課程習題不存在' });
+      return;
+    }
+
     setFeedback({ status: 'loading', message: '正在檢查你的答案...' });
     
     try {
-      // 修改 API URL 從 3000 到 5000
       const response = await fetch('http://localhost:5000/api/checkAnswer', {
         method: 'POST',
         headers: {
@@ -67,8 +71,7 @@ const PythonLesson = () => {
       });
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`無法檢查答案: ${response.status} ${errorData.error || ''}`);
+        throw new Error(`無法檢查答案: ${response.status}`);
       }
       
       const result = await response.json();
@@ -86,11 +89,16 @@ const PythonLesson = () => {
     navigate('/');
   };
 
-  // 處理返回部分
+  // 處理加載狀態
   if (loading) {
-    return <div className="loading">正在準備課程內容...<span className="loading-dots"></span></div>;
+    return (
+      <div className="loading">
+        正在準備課程內容...<span className="loading-dots"></span>
+      </div>
+    );
   }
 
+  // 處理錯誤狀態
   if (error) {
     return (
       <div className="error-container">
@@ -100,7 +108,16 @@ const PythonLesson = () => {
     );
   }
 
-  // 從 PythonLessonFixed.js 複製返回部分，確保元件完整
+  // 處理數據加載成功但內容為空的情況
+  if (!lesson) {
+    return (
+      <div className="error-container">
+        <p className="error-message">課程內容為空</p>
+        <button onClick={handleBack}>返回主頁</button>
+      </div>
+    );
+  }
+
   return (
     <div className="lesson-container">
       <div className="lesson-nav">
@@ -159,4 +176,4 @@ const PythonLesson = () => {
   );
 };
 
-export default PythonLesson;
+export default PythonLessonFixed;

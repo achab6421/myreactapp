@@ -248,7 +248,7 @@ app.get('/api/debug/assistant', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`伺服器運行於 http://localhost:${PORT}`);
   console.log(`健康檢查: http://localhost:${PORT}/api/health`);

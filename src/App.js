@@ -1,30 +1,38 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './components/Home';
-import PythonLesson from './components/PythonLesson';
-import ErrorBoundary from './components/ErrorBoundary';
-import './App.css';
+import { ExerciseProvider } from './context/ExerciseContext';
+import Navbar from './components/Navbar';
+import HomePage from './pages/HomePage';
+import ExercisesPage from './pages/ExercisesPage';
+import ExerciseDetailPage from './pages/ExerciseDetailPage';
+import CreateExercisePage from './pages/CreateExercisePage';
+import EditExercisePage from './pages/EditExercisePage';
+import TestEditorPage from './pages/TestEditorPage';
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <header className="App-header">
-          <h1>Python 教學平台</h1>
-        </header>
-        <main>
-          <ErrorBoundary>
+    <ExerciseProvider>
+      <Router>
+        <div className="App">
+          <Navbar />
+          <main className="pb-5">
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/lesson" element={<PythonLesson />} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/exercises" element={<ExercisesPage />} />
+              <Route path="/exercises/create" element={<CreateExercisePage />} />
+              <Route path="/exercises/:id" element={<ExerciseDetailPage />} />
+              <Route path="/exercises/edit/:id" element={<EditExercisePage />} />
+              <Route path="/test-editor" element={<TestEditorPage />} />
             </Routes>
-          </ErrorBoundary>
-        </main>
-        <footer>
-          <p>© {new Date().getFullYear()} Python 教學平台</p>
-        </footer>
-      </div>
-    </Router>
+          </main>
+          <footer className="bg-dark text-white py-4 mt-auto">
+            <div className="container text-center">
+              <p className="mb-0">© {new Date().getFullYear()} Python 個人教學平台</p>
+            </div>
+          </footer>
+        </div>
+      </Router>
+    </ExerciseProvider>
   );
 }
 
